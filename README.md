@@ -56,8 +56,8 @@
 ## 🚀 Setup
 
 ```bash
-git clone <this-repo>
-cd <this-repo>
+git clone https://github.com/AbelXeon/Project-RESONANCE
+cd Project-RESONANCE
 
 python -m venv venv
 source venv/bin/activate      # Windows: venv\Scripts\activate
@@ -136,6 +136,4 @@ WantedBy=multi-user.target
 
 ---
 
-## 📄 License
 
-MIT
