@@ -17,6 +17,7 @@ A Telegram bot powered by Groq for chat and Deepgram for voice transcription, wi
 ├── groq_client.py        # Chat completions + tool-calling loop
 ├── search_tool.py        # Web search tool definition
 ├── deepgram_client.py    # Voice note transcription
+├── keepalive.py          # Minimal HTTP server for host/uptime-monitor compatibility
 ├── persona.example.txt   # Template for the bot's personality
 ├── persona.txt           # Your actual personality (gitignored, create locally)
 ├── requirements.txt
@@ -67,12 +68,26 @@ python main.py
 
 ## Deployment
 
-The bot runs via long polling, so it doesn't require a public URL or open inbound ports — it only needs a host that keeps the process running continuously. Any of the following work:
+The bot runs via long polling, so it doesn't require a public URL for Telegram's sake — it just needs a host that keeps the process running continuously.
 
-- A VPS or free-tier cloud VM (e.g. Oracle Cloud Always Free) with a `systemd` service for auto-restart
-- A platform with a background worker service type (e.g. Render, Railway)
+A small Flask server (`keepalive.py`) runs alongside the bot purely to satisfy platforms that require something bound to an HTTP port. It serves a single `200 OK` response and has no connection to the bot's logic.
 
-Example `systemd` unit:
+### Render (free tier) + external ping
+
+Render's free tier only supports **Web Services** (apps that respond to HTTP requests), not background workers. A polling bot like this one never receives HTTP requests on its own, so left alone it would go to sleep after 15 minutes of inactivity and never wake back up. The workaround:
+
+1. Push this repo to Render as a **Web Service**.
+   - Build command: `pip install -r requirements.txt`
+   - Start command: `python main.py`
+   - Add your env vars (`TELEGRAM_TOKEN`, `GROQ_API_KEY`, `DEEPGRAM_API_KEY`) in the dashboard.
+2. Render assigns a public URL (e.g. `https://your-bot.onrender.com`) and a `PORT` env var, which `keepalive.py` binds to automatically.
+3. Sign up for a free account at [UptimeRobot](https://uptimerobot.com) (or [cron-job.org](https://cron-job.org)).
+4. Add a new monitor: HTTP(s), your Render URL, checked every 5–10 minutes.
+5. As long as the monitor keeps pinging, Render never sees 15 minutes of inactivity, so the bot stays up continuously — at no cost.
+
+### Alternative: VPS / free-tier cloud VM
+
+For a setup with no keep-alive dependency, run it on any VM (e.g. Oracle Cloud Always Free) with a `systemd` service for auto-restart:
 
 ```ini
 [Unit]
