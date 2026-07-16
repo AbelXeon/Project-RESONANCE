@@ -1,0 +1,115 @@
+# Jarvis Telegram Bot
+
+A Telegram bot with a J.A.R.V.I.S.-style personality, powered by Groq (chat) and Deepgram (voice transcription).
+
+## File structure
+
+```
+jarvis_bot/
+├── .env               # your real secrets (create this, don't commit it)
+├── .env.example       # template, safe to commit
+├── .gitignore
+├── requirements.txt
+├── config.py          # loads env vars + Jarvis personality prompt
+├── groq_client.py     # talks to Groq for chat replies, handles tool-calling
+├── search_tool.py     # free web search (no API key needed) Jarvis can call
+├── deepgram_client.py # transcribes voice notes
+├── main.py            # Telegram handlers, entrypoint
+└── README.md
+```
+
+**Important:** before you push to GitHub, make sure `.gitignore` is committed too — it stops your real `.env` (with your live keys) from ever reaching the repo. If you already pushed a `.env` by accident, rotate those keys immediately (regenerate them in BotFather/Groq/Deepgram) since anyone with the repo can see the old ones in git history.
+
+## Setup
+
+1. **Get a Telegram bot token**
+   - Open Telegram, search for **@BotFather**
+   - Send `/newbot`, follow the prompts (choose a name and a username ending in `bot`)
+   - It gives you a token like `123456789:AAExxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+2. **Get a Groq API key**
+   - console.groq.com → API Keys → create one (free tier available)
+
+3. **Get a Deepgram API key**
+   - console.deepgram.com → sign up → API Keys (free credit on signup)
+
+4. **Create your `.env`**
+   ```bash
+   cp .env.example .env
+   ```
+   Paste your three keys in.
+
+5. **Install dependencies**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate   # Windows: venv\Scripts\activate
+   pip install -r requirements.txt
+   ```
+
+6. **Run it**
+   ```bash
+   python main.py
+   ```
+   Open Telegram, message your bot, say hi.
+
+## Keeping it running 24/7
+
+Right now the bot only runs while `python main.py` is active in your terminal — close the window,
+it stops. It uses **polling** (asks Telegram for updates), not a webhook, so it doesn't need a
+public URL — it just needs to keep running somewhere.
+
+### Option A — Render Background Worker (matches your TutorLink setup)
+Render's free tier doesn't support background workers (only free *web services*, which sleep —
+no good for a bot that needs to always be listening). A worker starts at ~$7/month.
+
+1. Push this repo to GitHub (with `.gitignore` in place, see above).
+2. On Render: **New → Background Worker** → connect your repo.
+3. Build command: `pip install -r requirements.txt`
+4. Start command: `python main.py`
+5. Add your three env vars (`TELEGRAM_TOKEN`, `GROQ_API_KEY`, `DEEPGRAM_API_KEY`) in the
+   Environment tab — don't put them in the repo.
+6. Deploy. Render keeps it running and restarts it if it crashes.
+
+### Option B — A free VM (Oracle Cloud Free Tier) + systemd — $0/month
+More setup, but genuinely free forever.
+
+1. Spin up an "Always Free" VM on Oracle Cloud (or any small Linux VPS you already have).
+2. SSH in, install Python, `git clone` your repo, `pip install -r requirements.txt`, create your `.env`.
+3. Create `/etc/systemd/system/jarvis-bot.service`:
+   ```ini
+   [Unit]
+   Description=Jarvis Telegram Bot
+   After=network.target
+
+   [Service]
+   WorkingDirectory=/home/youruser/jarvis_bot
+   ExecStart=/usr/bin/python3 main.py
+   Restart=always
+   User=youruser
+
+   [Install]
+   WantedBy=multi-user.target
+   ```
+4. `sudo systemctl enable --now jarvis-bot` — it now survives reboots and crashes.
+5. Logs: `journalctl -u jarvis-bot -f`
+
+### Option C — Your own PC
+Free, but only online when your PC is. Fine for testing, not for "always available."
+
+## How it works
+
+- `main.py` is the only thing that talks to Telegram. It has two handlers: one for text, one for voice notes.
+- Text goes to `groq_client.ask_jarvis()`, which keeps a short rolling history per chat so it remembers context.
+- Jarvis can now call `web_search` (in `search_tool.py`, using free DuckDuckGo search, no API key)
+  whenever a question needs current info — news, prices, versions, anything that could have changed
+  since the model's training. It decides on its own when to search; you don't have to ask it to.
+- Voice notes get downloaded as `.ogg`, sent to Deepgram for transcription, then the transcript is fed into the same `ask_jarvis()` function so Jarvis replies to what you said.
+- The personality lives in `config.py` as `JARVIS_SYSTEM_PROMPT` — this now includes a cybersecurity
+  mentor mode: when you ask Linux/networking/security questions, Jarvis explains the reasoning, not
+  just the answer, and will point you at legal practice environments (TryHackMe, HTB, your own lab
+  VMs) rather than ever give exploit/attack instructions against real targets.
+
+## Notes for later (not needed to get started)
+
+- Chat history is stored in memory (`_history` dict in `groq_client.py`), so it resets every time you restart the bot. Fine for testing; swap for SQLite/Postgres if you want persistence.
+- If you want Jarvis to *talk back* (voice replies, not just text), that's a text-to-speech step (e.g. Deepgram also does TTS, or ElevenLabs) — happy to add that once the text/voice-in flow feels good.
