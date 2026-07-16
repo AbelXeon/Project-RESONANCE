@@ -1,18 +1,33 @@
-Telegram AI Assistant Bot
+<div align="center">
 
-A Telegram bot powered by Groq for chat and Deepgram for voice transcription, with live web search and a fully customizable personality.
+# 🤖 Telegram AI Assistant Bot
 
-Features
+**A personal AI assistant on Telegram** — chat, voice notes, live web search, and a fully customizable personality.
 
+![Python](https://img.shields.io/badge/python-3.12-blue?logo=python&logoColor=white)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Groq](https://img.shields.io/badge/LLM-Groq-orange)
+![Deepgram](https://img.shields.io/badge/Voice-Deepgram-purple)
+![Status](https://img.shields.io/badge/status-active-brightgreen)
 
-Text and voice input — handles typed messages and Telegram voice notes (transcribed via Deepgram).
-Live web search — the model can call a search tool on its own for time-sensitive questions (news, prices, current events), instead of relying solely on training data.
-Per-chat conversation memory — keeps a rolling window of recent messages so replies stay contextual.
-Configurable personality — the system prompt lives in a separate, gitignored file, so personal customization never has to touch version control.
+</div>
 
+---
 
-Architecture
+## ✨ Features
 
+| | |
+|---|---|
+| 💬 **Text & voice input** | Handles typed messages and Telegram voice notes, transcribed via Deepgram |
+| 🌐 **Live web search** | The model calls a search tool on its own for time-sensitive questions — news, prices, current events — instead of relying only on training data |
+| 🧠 **Per-chat memory** | Keeps a rolling window of recent messages so replies stay contextual |
+| 🎭 **Configurable personality** | The system prompt lives in a separate, gitignored file — customize freely without touching version control |
+
+---
+
+## 🗂️ Architecture
+
+```
 ├── main.py              # Telegram bot entrypoint and message handlers
 ├── config.py             # Environment config and persona loading
 ├── groq_client.py        # Chat completions + tool-calling loop
@@ -22,22 +37,26 @@ Architecture
 ├── persona.example.txt   # Template for the bot's personality
 ├── persona.txt           # Your actual personality (gitignored, create locally)
 ├── requirements.txt
-└── .env.example           # Environment variable template
+└── .env.example          # Environment variable template
+```
 
-main.py is the only module that talks to Telegram directly. Text messages and transcribed voice notes are both routed through groq_client.ask_vivi(), which handles the Groq API call and, when needed, hands off to search_tool.py for live information before responding.
+`main.py` is the only module that talks to Telegram directly. Text messages and transcribed voice notes are both routed through `groq_client.ask_vivi()`, which handles the Groq API call and, when needed, hands off to `search_tool.py` for live information before responding.
 
-Requirements
+---
 
+## 📋 Requirements
 
-Python 3.10+
-A Telegram bot token (@BotFather)
-A Groq API key (console.groq.com)
-A Deepgram API key (console.deepgram.com)
+- Python 3.10+
+- A Telegram bot token → [@BotFather](https://t.me/BotFather)
+- A Groq API key → [console.groq.com](https://console.groq.com)
+- A Deepgram API key → [console.deepgram.com](https://console.deepgram.com)
 
+---
 
-Setup
+## 🚀 Setup
 
-bashgit clone <this-repo>
+```bash
+git clone <this-repo>
 cd <this-repo>
 
 python -m venv venv
@@ -45,51 +64,56 @@ source venv/bin/activate      # Windows: venv\Scripts\activate
 
 pip install -r requirements.txt
 
-cp .env.example .env          # then fill in your API keys
+cp .env.example .env                 # then fill in your API keys
 cp persona.example.txt persona.txt   # then customize the personality
+```
 
 Run it:
 
-bashpython main.py
+```bash
+python main.py
+```
 
-Configuration
+---
 
-Environment variables (.env):
+## ⚙️ Configuration
 
-VariableDescriptionTELEGRAM_TOKENBot token from BotFatherGROQ_API_KEYAPI key for chat completionsDEEPGRAM_API_KEYAPI key for voice transcription
+**Environment variables** (`.env`):
 
-Personality (persona.txt): plain text, loaded as the system prompt at startup. Not tracked by git — customize freely without exposing personal details in a public repo. If persona.txt doesn't exist, the bot falls back to the generic template in persona.example.txt.
+| Variable | Description |
+|---|---|
+| `TELEGRAM_TOKEN` | Bot token from BotFather |
+| `GROQ_API_KEY` | API key for chat completions |
+| `DEEPGRAM_API_KEY` | API key for voice transcription |
 
-Deployment
+**Personality** (`persona.txt`): plain text, loaded as the system prompt at startup. Not tracked by git — customize freely without exposing personal details in a public repo. If `persona.txt` doesn't exist, the bot falls back to the generic template in `persona.example.txt`.
 
-The bot runs via long polling, so it doesn't require a public URL for Telegram's sake — it just needs a host that keeps the process running continuously.
+---
 
-A small Flask server (keepalive.py) runs alongside the bot purely to satisfy platforms that require something bound to an HTTP port. It serves a single 200 OK response and has no connection to the bot's logic.
+## ☁️ Deployment
 
-Render (free tier) + external ping
+The bot runs via long polling, so it doesn't need a public URL for Telegram's sake — it just needs a host that keeps the process running continuously.
 
-Render's free tier only supports Web Services (apps that respond to HTTP requests), not background workers. A polling bot like this one never receives HTTP requests on its own, so left alone it would go to sleep after 15 minutes of inactivity and never wake back up. The workaround:
+A small Flask server (`keepalive.py`) runs alongside the bot purely to satisfy platforms that require something bound to an HTTP port. It serves a single `200 OK` response and has no connection to the bot's logic.
 
+### Option A — Render (free tier) + uptime ping
 
-Push this repo to Render as a Web Service.
+Render's free tier only supports **Web Services** (apps that respond to HTTP requests), not background workers. A polling bot never receives HTTP requests on its own, so left alone it would sleep after 15 minutes and never wake back up. The workaround:
 
-Build command: pip install -r requirements.txt
-Start command: python main.py
-Add your env vars (TELEGRAM_TOKEN, GROQ_API_KEY, DEEPGRAM_API_KEY) in the dashboard.
+1. Push this repo to Render as a **Web Service**.
+   - Build command: `pip install -r requirements.txt`
+   - Start command: `python main.py`
+   - Add your env vars (`TELEGRAM_TOKEN`, `GROQ_API_KEY`, `DEEPGRAM_API_KEY`) in the dashboard.
+2. Render assigns a public URL and a `PORT` env var, which `keepalive.py` binds to automatically.
+3. Add a free monitor on [UptimeRobot](https://uptimerobot.com) (or [cron-job.org](https://cron-job.org)) pointed at that URL, checked every 5–10 minutes.
+4. As long as the monitor keeps pinging, Render never sees 15 minutes of inactivity — the bot stays up continuously, at no cost.
 
+### Option B — VPS / free-tier cloud VM
 
+For a setup with no keep-alive dependency, run it on any VM (e.g. Oracle Cloud Always Free) with a `systemd` service for auto-restart:
 
-Render assigns a public URL (e.g. https://your-bot.onrender.com) and a PORT env var, which keepalive.py binds to automatically.
-Sign up for a free account at UptimeRobot (or cron-job.org).
-Add a new monitor: HTTP(s), your Render URL, checked every 5–10 minutes.
-As long as the monitor keeps pinging, Render never sees 15 minutes of inactivity, so the bot stays up continuously — at no cost.
-
-
-Alternative: VPS / free-tier cloud VM
-
-For a setup with no keep-alive dependency, run it on any VM (e.g. Oracle Cloud Always Free) with a systemd service for auto-restart:
-
-ini[Unit]
+```ini
+[Unit]
 Description=Telegram Bot
 After=network.target
 
@@ -101,14 +125,17 @@ User=youruser
 
 [Install]
 WantedBy=multi-user.target
+```
 
-Notes
+---
 
+## 📝 Notes
 
-Conversation history is stored in memory and resets on restart. For persistence across restarts, swap the in-memory store in groq_client.py for SQLite or another database.
-Text-to-speech (spoken replies) is not implemented, but could be added via Deepgram's or another provider's TTS API.
+- Conversation history is stored in memory and resets on restart. For persistence, swap the in-memory store in `groq_client.py` for SQLite or another database.
+- Text-to-speech (spoken replies) isn't implemented, but could be added via Deepgram's or another provider's TTS API.
 
+---
 
-License
+## 📄 License
 
 MIT
