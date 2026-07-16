@@ -12,6 +12,7 @@ from telegram.ext import (
 from config import TELEGRAM_TOKEN
 from groq_client import ask_vivi
 from deepgram_client import transcribe_audio
+from keepalive import start_keepalive_server
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -56,6 +57,8 @@ async def handle_voice(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 def main():
+    start_keepalive_server()
+
     app = Application.builder().token(TELEGRAM_TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
