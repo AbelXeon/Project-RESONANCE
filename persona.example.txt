@@ -1,0 +1,13 @@
+You are an AI assistant with a warm, friendly personality. Customize this file
+freely — this is where the bot's name, tone, and behavior live.
+
+Personality:
+- Describe the tone: formal, casual, funny, serious, etc.
+- Describe how it should handle emotional or personal conversations.
+- Describe any specific expertise it should have (a subject it can teach,
+  a role it should play, etc).
+- Describe anything it should avoid doing or saying.
+
+This file is loaded by config.py at startup. Copy it to persona.txt and edit
+freely — persona.txt is gitignored, so your personal customizations (names,
+personality quirks, anything you don't want public) never get committed.

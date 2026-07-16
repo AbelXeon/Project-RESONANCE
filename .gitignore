@@ -1,4 +1,5 @@
 .env
+persona.txt
 venv/
 __pycache__/
 *.pyc

@@ -1,115 +1,99 @@
-# Vivi Telegram Bot
+# Telegram AI Assistant Bot
 
-A Telegram bot with a Vivi-style personality, powered by Groq (chat) and Deepgram (voice transcription).
+A Telegram bot powered by Groq for chat and Deepgram for voice transcription, with live web search and a fully customizable personality.
 
-## File structure
+## Features
+
+- **Text and voice input** — handles typed messages and Telegram voice notes (transcribed via Deepgram).
+- **Live web search** — the model can call a search tool on its own for time-sensitive questions (news, prices, current events), instead of relying solely on training data.
+- **Per-chat conversation memory** — keeps a rolling window of recent messages so replies stay contextual.
+- **Configurable personality** — the system prompt lives in a separate, gitignored file, so personal customization never has to touch version control.
+
+## Architecture
 
 ```
-jarvis_bot/
-├── .env               # your real secrets (create this, don't commit it)
-├── .env.example       # template, safe to commit
-├── .gitignore
+├── main.py              # Telegram bot entrypoint and message handlers
+├── config.py             # Environment config and persona loading
+├── groq_client.py        # Chat completions + tool-calling loop
+├── search_tool.py        # Web search tool definition
+├── deepgram_client.py    # Voice note transcription
+├── persona.example.txt   # Template for the bot's personality
+├── persona.txt           # Your actual personality (gitignored, create locally)
 ├── requirements.txt
-├── config.py          # loads env vars + Vivi personality prompt
-├── groq_client.py     # talks to Groq for chat replies, handles tool-calling
-├── search_tool.py     # free web search (no API key needed) Vivi can call
-├── deepgram_client.py # transcribes voice notes
-├── main.py            # Telegram handlers, entrypoint
-└── README.md
+└── .env.example           # Environment variable template
 ```
 
-**Important:** before you push to GitHub, make sure `.gitignore` is committed too — it stops your real `.env` (with your live keys) from ever reaching the repo. If you already pushed a `.env` by accident, rotate those keys immediately (regenerate them in BotFather/Groq/Deepgram) since anyone with the repo can see the old ones in git history.
+`main.py` is the only module that talks to Telegram directly. Text messages and transcribed voice notes are both routed through `groq_client.ask_vivi()`, which handles the Groq API call and, when needed, hands off to `search_tool.py` for live information before responding.
+
+## Requirements
+
+- Python 3.10+
+- A Telegram bot token ([@BotFather](https://t.me/BotFather))
+- A Groq API key ([console.groq.com](https://console.groq.com))
+- A Deepgram API key ([console.deepgram.com](https://console.deepgram.com))
 
 ## Setup
 
-1. **Get a Telegram bot token**
-   - Open Telegram, search for **@BotFather**
-   - Send `/newbot`, follow the prompts (choose a name and a username ending in `bot`)
-   - It gives you a token like `123456789:AAExxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
+```bash
+git clone <this-repo>
+cd <this-repo>
 
-2. **Get a Groq API key**
-   - console.groq.com → API Keys → create one (free tier available)
+python -m venv venv
+source venv/bin/activate      # Windows: venv\Scripts\activate
 
-3. **Get a Deepgram API key**
-   - console.deepgram.com → sign up → API Keys (free credit on signup)
+pip install -r requirements.txt
 
-4. **Create your `.env`**
-   ```bash
-   cp .env.example .env
-   ```
-   Paste your three keys in.
+cp .env.example .env          # then fill in your API keys
+cp persona.example.txt persona.txt   # then customize the personality
+```
 
-5. **Install dependencies**
-   ```bash
-   python -m venv venv
-   source venv/bin/activate   # Windows: venv\Scripts\activate
-   pip install -r requirements.txt
-   ```
+Run it:
 
-6. **Run it**
-   ```bash
-   python main.py
-   ```
-   Open Telegram, message your bot, say hi.
+```bash
+python main.py
+```
 
-## Keeping it running 24/7
+## Configuration
 
-Right now the bot only runs while `python main.py` is active in your terminal — close the window,
-it stops. It uses **polling** (asks Telegram for updates), not a webhook, so it doesn't need a
-public URL — it just needs to keep running somewhere.
+**Environment variables** (`.env`):
 
-### Option A — Render Background Worker (matches your TutorLink setup)
-Render's free tier doesn't support background workers (only free *web services*, which sleep —
-no good for a bot that needs to always be listening). A worker starts at ~$7/month.
+| Variable | Description |
+|---|---|
+| `TELEGRAM_TOKEN` | Bot token from BotFather |
+| `GROQ_API_KEY` | API key for chat completions |
+| `DEEPGRAM_API_KEY` | API key for voice transcription |
 
-1. Push this repo to GitHub (with `.gitignore` in place, see above).
-2. On Render: **New → Background Worker** → connect your repo.
-3. Build command: `pip install -r requirements.txt`
-4. Start command: `python main.py`
-5. Add your three env vars (`TELEGRAM_TOKEN`, `GROQ_API_KEY`, `DEEPGRAM_API_KEY`) in the
-   Environment tab — don't put them in the repo.
-6. Deploy. Render keeps it running and restarts it if it crashes.
+**Personality** (`persona.txt`): plain text, loaded as the system prompt at startup. Not tracked by git — customize freely without exposing personal details in a public repo. If `persona.txt` doesn't exist, the bot falls back to the generic template in `persona.example.txt`.
 
-### Option B — A free VM (Oracle Cloud Free Tier) + systemd — $0/month
-More setup, but genuinely free forever.
+## Deployment
 
-1. Spin up an "Always Free" VM on Oracle Cloud (or any small Linux VPS you already have).
-2. SSH in, install Python, `git clone` your repo, `pip install -r requirements.txt`, create your `.env`.
-3. Create `/etc/systemd/system/jarvis-bot.service`:
-   ```ini
-   [Unit]
-   Description=Vivi Telegram Bot
-   After=network.target
+The bot runs via long polling, so it doesn't require a public URL or open inbound ports — it only needs a host that keeps the process running continuously. Any of the following work:
 
-   [Service]
-   WorkingDirectory=/home/youruser/jarvis_bot
-   ExecStart=/usr/bin/python3 main.py
-   Restart=always
-   User=youruser
+- A VPS or free-tier cloud VM (e.g. Oracle Cloud Always Free) with a `systemd` service for auto-restart
+- A platform with a background worker service type (e.g. Render, Railway)
 
-   [Install]
-   WantedBy=multi-user.target
-   ```
-4. `sudo systemctl enable --now jarvis-bot` — it now survives reboots and crashes.
-5. Logs: `journalctl -u jarvis-bot -f`
+Example `systemd` unit:
 
-### Option C — Your own PC
-Free, but only online when your PC is. Fine for testing, not for "always available."
+```ini
+[Unit]
+Description=Telegram Bot
+After=network.target
 
-## How it works
+[Service]
+WorkingDirectory=/path/to/repo
+ExecStart=/path/to/repo/venv/bin/python main.py
+Restart=always
+User=youruser
 
-- `main.py` is the only thing that talks to Telegram. It has two handlers: one for text, one for voice notes.
-- Text goes to `groq_client.ask_vivi()`, which keeps a short rolling history per chat so it remembers context.
-- Vivi can now call `web_search` (in `search_tool.py`, using free DuckDuckGo search, no API key)
-  whenever a question needs current info — news, prices, versions, anything that could have changed
-  since the model's training. It decides on its own when to search; you don't have to ask it to.
-- Voice notes get downloaded as `.ogg`, sent to Deepgram for transcription, then the transcript is fed into the same `ask_vivi()` function so Vivi replies to what you said.
-- The personality lives in `config.py` as `VIVI_SYSTEM_PROMPT` — this now includes a cybersecurity
-  mentor mode: when you ask Linux/networking/security questions, Vivi explains the reasoning, not
-  just the answer, and will point you at legal practice environments (TryHackMe, HTB, your own lab
-  VMs) rather than ever give exploit/attack instructions against real targets.
+[Install]
+WantedBy=multi-user.target
+```
 
-## Notes for later (not needed to get started)
+## Notes
 
-- Chat history is stored in memory (`_history` dict in `groq_client.py`), so it resets every time you restart the bot. Fine for testing; swap for SQLite/Postgres if you want persistence.
-- If you want Vivi to *talk back* (voice replies, not just text), that's a text-to-speech step (e.g. Deepgram also does TTS, or ElevenLabs) — happy to add that once the text/voice-in flow feels good.
+- Conversation history is stored in memory and resets on restart. For persistence across restarts, swap the in-memory store in `groq_client.py` for SQLite or another database.
+- Text-to-speech (spoken replies) is not implemented, but could be added via Deepgram's or another provider's TTS API.
+
+## License
+
+MIT
