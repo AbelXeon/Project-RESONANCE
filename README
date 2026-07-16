@@ -1,6 +1,6 @@
-# Jarvis Telegram Bot
+# Vivi Telegram Bot
 
-A Telegram bot with a J.A.R.V.I.S.-style personality, powered by Groq (chat) and Deepgram (voice transcription).
+A Telegram bot with a Vivi-style personality, powered by Groq (chat) and Deepgram (voice transcription).
 
 ## File structure
 
@@ -10,9 +10,9 @@ jarvis_bot/
 ├── .env.example       # template, safe to commit
 ├── .gitignore
 ├── requirements.txt
-├── config.py          # loads env vars + Jarvis personality prompt
+├── config.py          # loads env vars + Vivi personality prompt
 ├── groq_client.py     # talks to Groq for chat replies, handles tool-calling
-├── search_tool.py     # free web search (no API key needed) Jarvis can call
+├── search_tool.py     # free web search (no API key needed) Vivi can call
 ├── deepgram_client.py # transcribes voice notes
 ├── main.py            # Telegram handlers, entrypoint
 └── README.md
@@ -78,7 +78,7 @@ More setup, but genuinely free forever.
 3. Create `/etc/systemd/system/jarvis-bot.service`:
    ```ini
    [Unit]
-   Description=Jarvis Telegram Bot
+   Description=Vivi Telegram Bot
    After=network.target
 
    [Service]
@@ -99,17 +99,17 @@ Free, but only online when your PC is. Fine for testing, not for "always availab
 ## How it works
 
 - `main.py` is the only thing that talks to Telegram. It has two handlers: one for text, one for voice notes.
-- Text goes to `groq_client.ask_jarvis()`, which keeps a short rolling history per chat so it remembers context.
-- Jarvis can now call `web_search` (in `search_tool.py`, using free DuckDuckGo search, no API key)
+- Text goes to `groq_client.ask_vivi()`, which keeps a short rolling history per chat so it remembers context.
+- Vivi can now call `web_search` (in `search_tool.py`, using free DuckDuckGo search, no API key)
   whenever a question needs current info — news, prices, versions, anything that could have changed
   since the model's training. It decides on its own when to search; you don't have to ask it to.
-- Voice notes get downloaded as `.ogg`, sent to Deepgram for transcription, then the transcript is fed into the same `ask_jarvis()` function so Jarvis replies to what you said.
-- The personality lives in `config.py` as `JARVIS_SYSTEM_PROMPT` — this now includes a cybersecurity
-  mentor mode: when you ask Linux/networking/security questions, Jarvis explains the reasoning, not
+- Voice notes get downloaded as `.ogg`, sent to Deepgram for transcription, then the transcript is fed into the same `ask_vivi()` function so Vivi replies to what you said.
+- The personality lives in `config.py` as `VIVI_SYSTEM_PROMPT` — this now includes a cybersecurity
+  mentor mode: when you ask Linux/networking/security questions, Vivi explains the reasoning, not
   just the answer, and will point you at legal practice environments (TryHackMe, HTB, your own lab
   VMs) rather than ever give exploit/attack instructions against real targets.
 
 ## Notes for later (not needed to get started)
 
 - Chat history is stored in memory (`_history` dict in `groq_client.py`), so it resets every time you restart the bot. Fine for testing; swap for SQLite/Postgres if you want persistence.
-- If you want Jarvis to *talk back* (voice replies, not just text), that's a text-to-speech step (e.g. Deepgram also does TTS, or ElevenLabs) — happy to add that once the text/voice-in flow feels good.
+- If you want Vivi to *talk back* (voice replies, not just text), that's a text-to-speech step (e.g. Deepgram also does TTS, or ElevenLabs) — happy to add that once the text/voice-in flow feels good.

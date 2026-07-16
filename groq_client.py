@@ -1,6 +1,6 @@
 import json
 from groq import Groq
-from config import GROQ_API_KEY, GROQ_MODEL, JARVIS_SYSTEM_PROMPT
+from config import GROQ_API_KEY, GROQ_MODEL, VIVI_SYSTEM_PROMPT
 from search_tool import web_search, WEB_SEARCH_TOOL_SCHEMA
 
 client = Groq(api_key=GROQ_API_KEY)
@@ -19,11 +19,11 @@ def get_history(chat_id: int):
     return _history[chat_id]
 
 
-def ask_jarvis(chat_id: int, user_text: str) -> str:
+def ask_vivi(chat_id: int, user_text: str) -> str:
     history = get_history(chat_id)
     history.append({"role": "user", "content": user_text})
 
-    messages = [{"role": "system", "content": JARVIS_SYSTEM_PROMPT}] + history[-MAX_TURNS:]
+    messages = [{"role": "system", "content": VIVI_SYSTEM_PROMPT}] + history[-MAX_TURNS:]
 
     for _ in range(MAX_TOOL_HOPS):
         response = client.chat.completions.create(
@@ -54,4 +54,4 @@ def ask_jarvis(chat_id: int, user_text: str) -> str:
         return reply
 
     # Fallback if it somehow keeps looping
-    return "I've hit a wall trying to research that, sir. Mind rephrasing?"
+    return "Okay that search rabbit hole went nowhere — can you ask me that a different way?"
