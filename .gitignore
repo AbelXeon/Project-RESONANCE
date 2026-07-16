@@ -1,0 +1,6 @@
+.env
+__pycache__/
+*.db
+ngrok.exe
+node_modules/
+backend/__pycache__/
