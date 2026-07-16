@@ -1,46 +1,74 @@
 <div align="center">
 
-# 🤖 Telegram AI Assistant (Vivi)
-### *The ultimate AI-powered companion for your Telegram*
+<!-- AMAZING HEADER GENERATOR -->
+<img src="https://capsule-render.vercel.app/render?type=waving&color=0:2e0854,50:4c1d95,100:000000&height=280&section=header&text=VIVI%20AI&fontSize=90&fontAlignY=38&animation=twinkling&fontColor=ffffff" width="100%" />
 
-[![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
-[![Groq](https://img.shields.io/badge/LLM-Groq-f3d122?style=for-the-badge&logo=lightning&logoColor=black)](https://groq.com)
-[![Deepgram](https://img.shields.io/badge/Voice-Deepgram-4c1d95?style=for-the-badge&logo=audio-technica&logoColor=white)](https://deepgram.com)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+### 🤖 **The Next-Gen Telegram AI Assistant**
+*Connecting Minds across Ethiopia & the World through High-Speed Intelligence*
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" />
+  <img src="https://img.shields.io/badge/Groq_AI-f3d122?style=for-the-badge&logo=lightning&logoColor=black" />
+  <img src="https://img.shields.io/badge/Deepgram-4c1d95?style=for-the-badge&logo=audio-technica&logoColor=white" />
+  <img src="https://img.shields.io/badge/Render-46E3B7?style=for-the-badge&logo=render&logoColor=white" />
+</p>
 
 ---
 
-[✨ Features](#-features) • [🛠️ Setup](#-setup) • [☁️ Deployment](#-deployment) • [⚙️ Configuration](#-configuration)
+[🚀 Quick Start](#-setup) • [✨ Features](#-features) • [☁️ Deployment](#-deployment) • [⚙️ Config](#-configuration)
+
+#### [Live Demo → t.me/ViviAIBot](https://t.me/YourBotUsername)
 
 </div>
 
 ---
 
-## 🌟 Overview
-**Vivi** is not just another bot. It is a high-speed AI assistant that listens, thinks, and searches the web in real-time. By combining the speed of **Groq**, the accuracy of **Deepgram**, and live web-search capabilities, Vivi brings a ChatGPT-like experience directly into your Telegram chats.
-
-> [!TIP]
-> This bot includes a **Keep-Alive** server specifically designed to keep it running 24/7 on free hosting platforms like Render.
+## 📖 About Vivi AI
+Vivi is a sophisticated AI assistant built for Telegram. Unlike standard bots, Vivi combines **Voice Intelligence** via Deepgram and **Real-time Web Search** via Groq's LPU. Whether you are typing a question or sending a voice note from the streets of Addis, Vivi responds in milliseconds with up-to-date information.
 
 ---
 
 ## ✨ Features
 
-- 🎙️ **Voice Intelligence**: Send a voice note, and Vivi transcribes it instantly using Deepgram’s high-speed API.
-- ⚡ **Lightning Fast**: Powered by Groq (LPU), providing near-instant responses.
-- 🌐 **Live Web Search**: Vivi doesn't just guess; she searches the live web for news, prices, and current events.
-- 🧠 **Smart Memory**: Context-aware conversations. She remembers what you said 5 minutes ago.
-- 🎭 **Custom Personality**: Easily change Vivi's "vibe" by editing the `persona.txt` file.
+| Feature | Description |
+| :--- | :--- |
+| 🎙️ **Voice Processing** | Sends voice notes? Vivi transcribes and understands them instantly. |
+| 🌐 **Live Web Search** | Real-time access to news, prices, and events—not limited to old data. |
+| ⚡ **LPU Speed** | Powered by Groq for the fastest LLM inference on the planet. |
+| 🧠 **Persistent Memory** | Remembers the flow of conversation for a natural human experience. |
+| 💤 **Always Awake** | Built-in `keepalive.py` to ensure 100% uptime on free hosting. |
 
 ---
 
-## 🗂️ Project Architecture
+## 🛠️ Tech Stack
 
-```text
-├── main.py              # 🚀 The Heart: Telegram bot handlers
-├── groq_client.py       # 🧠 The Brain: AI logic & tool calling
-├── search_tool.py       # 🔍 The Eyes: Live web search engine
-├── deepgram_client.py   # 👂 The Ears: Voice transcription
-├── keepalive.py         # 💤 The Coffee: Prevents server sleep
-├── config.py            # ⚙️ The Settings: Env & Persona loader
-└── persona.txt          # 👤 The Soul: Your bot's personality
+<table align="center">
+  <tr>
+    <td align="center" width="150">
+      <img src="https://skillicons.dev/icons?i=py" width="50" height="50" alt="Python" />
+      <br />Python 3.12
+    </td>
+    <td align="center" width="150">
+      <img src="https://skillicons.dev/icons?i=botpress" width="50" height="50" alt="Bot" />
+      <br />Telegram API
+    </td>
+    <td align="center" width="150">
+      <img src="https://skillicons.dev/icons?i=flask" width="50" height="50" alt="Flask" />
+      <br />Keep-Alive
+    </td>
+    <td align="center" width="150">
+      <img src="https://skillicons.dev/icons?i=github" width="50" height="50" alt="GitHub" />
+      <br />Git Actions
+    </td>
+  </tr>
+</table>
+
+---
+
+## 🚀 Setup
+
+### 1. Clone & Install
+```bash
+git clone https://github.com/AbelXeon/your-repo.git
+cd your-repo
+pip install -r requirements.txt
