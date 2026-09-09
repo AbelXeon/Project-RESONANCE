@@ -7,8 +7,8 @@ TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 DEEPGRAM_API_KEY = os.getenv("DEEPGRAM_API_KEY")
 
-# Gemini model to use
-GEMINI_MODEL = "gemini-2.5-flash"
+# Changed model name here:
+GEMINI_MODEL = "gemini-3.6-flash"
 
 # Load persona prompt
 _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
