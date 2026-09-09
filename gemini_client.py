@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 client = genai.Client(api_key=GEMINI_API_KEY)
 
-# Fast models list
+# 3.5-flash-lite does not think by default -> replies in ~0.5s
 MODELS_TO_TRY = [
     "gemini-3.5-flash-lite",
     "gemini-3.6-flash",
@@ -49,8 +49,6 @@ def ask_vivi(chat_id: int, user_text: str) -> str:
                         system_instruction=VIVI_SYSTEM_PROMPT,
                         temperature=0.7,
                         max_output_tokens=512,
-                        # ⚡ DISABLE THINKING TO MAKE REPLIES INSTANT:
-                        thinking_config=types.ThinkingConfig(thinking_budget=0),
                     ),
                 )
 
@@ -63,10 +61,11 @@ def ask_vivi(chat_id: int, user_text: str) -> str:
                 err_text = str(e)
                 logger.warning(f"Attempt {attempt + 1} for {model_name} failed: {err_text}")
 
+                # If server is overloaded, pause 1s and retry
                 if "503" in err_text or "UNAVAILABLE" in err_text:
                     time.sleep(1.0)
                     continue
-                
+
                 break
 
     logger.error(f"All model attempts failed: {last_error}")
