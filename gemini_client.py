@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 client = genai.Client(api_key=GEMINI_API_KEY)
 
-# 3.5-flash-lite is ultra-fast with virtually no 503 spikes; 3.6-flash as backup
+# Fast models list
 MODELS_TO_TRY = [
     "gemini-3.5-flash-lite",
     "gemini-3.6-flash",
@@ -40,7 +40,6 @@ def ask_vivi(chat_id: int, user_text: str) -> str:
     last_error = None
 
     for model_name in MODELS_TO_TRY:
-        # Retry up to 2 times if there's a temporary 503 spike
         for attempt in range(2):
             try:
                 response = client.models.generate_content(
@@ -49,6 +48,9 @@ def ask_vivi(chat_id: int, user_text: str) -> str:
                     config=types.GenerateContentConfig(
                         system_instruction=VIVI_SYSTEM_PROMPT,
                         temperature=0.7,
+                        max_output_tokens=512,
+                        # ⚡ DISABLE THINKING TO MAKE REPLIES INSTANT:
+                        thinking_config=types.ThinkingConfig(thinking_budget=0),
                     ),
                 )
 
@@ -61,12 +63,10 @@ def ask_vivi(chat_id: int, user_text: str) -> str:
                 err_text = str(e)
                 logger.warning(f"Attempt {attempt + 1} for {model_name} failed: {err_text}")
 
-                # If it's a temporary 503 high demand spike, pause 1s and retry
                 if "503" in err_text or "UNAVAILABLE" in err_text:
                     time.sleep(1.0)
                     continue
                 
-                # For any other error, move immediately to the next model
                 break
 
     logger.error(f"All model attempts failed: {last_error}")
