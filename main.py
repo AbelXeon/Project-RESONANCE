@@ -10,7 +10,7 @@ from telegram.ext import (
 )
 
 from config import TELEGRAM_TOKEN
-from groq_client import ask_vivi
+from gemini_client import ask_vivi  # <-- Updated here
 from deepgram_client import transcribe_audio
 from keepalive import start_keepalive_server
 
