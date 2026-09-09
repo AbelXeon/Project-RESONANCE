@@ -10,7 +10,7 @@ client = genai.Client(api_key=GEMINI_API_KEY)
 
 # In-memory history per chat_id
 _history = {}
-MAX_TURNS = 10  # How many past turns to retain
+MAX_TURNS = 10
 
 
 def get_history(chat_id: int):
@@ -23,7 +23,7 @@ def ask_vivi(chat_id: int, user_text: str) -> str:
     history = get_history(chat_id)
     history.append({"role": "user", "text": user_text})
 
-    # Prepare chat history for Gemini
+    # Prepare chat history turns for Gemini
     contents = []
     for msg in history[-MAX_TURNS:]:
         contents.append(
@@ -40,8 +40,6 @@ def ask_vivi(chat_id: int, user_text: str) -> str:
             config=types.GenerateContentConfig(
                 system_instruction=VIVI_SYSTEM_PROMPT,
                 temperature=0.7,
-                # Built-in live Google Search grounding
-                tools=[types.Tool(google_search=types.GoogleSearch())],
             ),
         )
 
